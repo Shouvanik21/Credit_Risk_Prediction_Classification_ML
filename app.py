@@ -7,11 +7,11 @@ model=joblib.load("svm_CreditRisk_model.pkl")
 scaler=joblib.load("scaler_CreditRisk.pkl")
 expected_columns=joblib.load("feature_columns_CreditRisk.pkl")
 
-st.title("Credit Risk Prediction")
+st.title("Credit Risk Prediction 📈")
 st.markdown("Provide the following details to predict the credit risk.")
 
 #collect user input
-person_age=st.number_input("Person's Age", min_value=18, max_value=120, value=30,step=1)
+person_age=st.slider("Person's Age", min_value=18, max_value=150, value=30,step=1)
 person_income=st.number_input("Person's Income", min_value=0, value=50000,step=1000)
 person_home_ownership=st.selectbox("Person's Home Ownership", options=df["person_home_ownership"].unique())
 person_emp_length=st.number_input("Person's Employment Length", min_value=0, value=5,step=1)
@@ -48,8 +48,13 @@ if st.button("Predict Credit Risk"):
     input_df = input_df[expected_columns]
     scaled_input = scaler.transform(input_df)
     prediction=model.predict(scaled_input)[0]
+
+    probabilities = model.predict_proba(scaled_input)[0]
+    dynamic_confidence = probabilities[prediction] * 100 
     
     if prediction == 1:
-        st.error(" The applicant is likely to default on the loan.")
+        st.error("⚠️ The applicant is likely to default on the loan.")
+        st.info(f"Model Confidence: {dynamic_confidence:.2f}% sure they will default.")
     else:
-        st.success("The applicant is unlikely to default on the loan.")    
+        st.success("✅ The applicant is unlikely to default on the loan.")  
+        st.info(f"Model Confidence: {dynamic_confidence:.2f}% sure they will not default.")  
